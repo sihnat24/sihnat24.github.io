@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CV Security Camera — Severin Ihnat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,400&family=Outfit:wght@300;400;500;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="project.css" />
+</head>
+<body>
+
+<nav id="nav">
+  <a class="nav-logo" href="/">SI<span>.</span></a>
+  <a class="nav-back" href="/#projects">← Back to projects</a>
+</nav>
+
+<div class="wrap">
+
+  <div class="proj-hero reveal">
+    <div class="proj-hero-text">
+      <p class="proj-meta">Computer Vision · Raspberry Pi · 2025</p>
+      <h1 class="proj-title">CV Security<br /><em>Camera</em></h1>
+      <div class="proj-tags">
+        <span class="proj-tag">Python</span>
+        <span class="proj-tag">YOLOv8</span>
+        <span class="proj-tag">ByteTrack</span>
+        <span class="proj-tag">OpenCV</span>
+        <span class="proj-tag">Raspberry Pi</span>
+      </div>
+      <div style="margin-top: 1.5rem;">
+        <a class="btn-solid" href="https://github.com/sihnat24/security-camera" target="_blank">GitHub →</a>
+      </div>
+    </div>
+  </div>
+
+  <section class="sec">
+    <div class="wrap" style="padding:0">
+      <p class="eyebrow reveal">Overview</p>
+      <h2 class="sec-title reveal rd1">What it is <em>&amp; why</em></h2>
+      <div class="body-text reveal rd2">
+        <p>A computer vision security system built around YOLOv8 pretrained on COCO, meaning person, dog, and car detection work out of the box with no training required. The model is the detector underneath — the real project is the infrastructure layered on top: persistent cross-frame object identity via ByteTrack, configurable zone alerting, loitering detection, and automatic clip recording triggered by suspicious activity. The system targets a Raspberry Pi as its final deployment platform, accepting either a local webcam or an RTSP stream from a Pi camera as input.</p>
+        <p>The motivation was to build a realistic security tool rather than a demo. Most CV tutorials stop at drawing bounding boxes. This project pushes past detection to handle the harder problems: what happens when the same person walks in and out of frame, how do you define a restricted area in pixel space, and how do you record footage before an alert is triggered so you don't miss the moment that caused it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap" style="padding:0">
+      <p class="eyebrow reveal">Technical Approach</p>
+      <h2 class="sec-title reveal rd1">Architecture &amp; <em>decisions</em></h2>
+      <div class="body-text reveal rd2">
+        <p>The pipeline is a single loop: read a frame from the source, run YOLOv8 with ByteTrack enabled, check each tracked object against defined zones, update state, and write the annotated frame to a rolling buffer. ByteTrack assigns a persistent integer ID to each object across frames using a LAP solver for assignment, which makes identity-dependent logic like loitering detection possible. Without tracking, you only know that a person exists in a frame — not that it's the same person who was there three seconds ago.</p>
+        <p>Video sources are abstracted behind a common interface (<code>stream</code>) with <code>read()</code>, <code>close()</code>, and <code>fps</code> / <code>frame_size</code> properties. Concrete implementations exist for a local webcam (<code>WebCamSource</code>) and a Raspberry Pi camera stream over HTTP (<code>RaspberrySource</code>). Swapping between them requires a single line change.</p>
+        <p>Zones are defined as arbitrary polygons in pixel coordinates. Each frame, a tracked object's center-bottom point is tested against the polygon using OpenCV's <code>pointPolygonTest</code>. The zone draws green when clear and red when triggered. Zone state is tracked per object ID, so entry and exit events are logged with timestamps only on state transitions — not once per frame.</p>
+        <p>The loitering system uses a 20-second rolling frame buffer (a fixed-size <code>deque</code>). When an object remains inside a zone beyond a configurable threshold, it flushes the pre-event buffer to a timestamped MP4 file and continues recording until the object exits. This ensures clips always capture what happened before the alert, not just after.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap" style="padding:0">
+      <p class="eyebrow reveal">Results</p>
+      <h2 class="sec-title reveal rd1">Outcomes &amp; <em>next steps</em></h2>
+      <div class="body-text reveal rd2">
+        <p>The system runs end-to-end on a laptop webcam, detecting and tracking people, dogs, and cats in real time with stable per-object IDs across frames. Zone entry and exit events are logged correctly, and the pre-buffer clip recording triggers reliably on loitering. Annotated clips are saved locally with timestamps for review.</p>
+        <p>The next step is deploying to a Raspberry Pi with a dedicated camera module. Planned extensions include a Telegram or email alert on loiter detection, multi-zone support with independent thresholds per zone, and a re-identification module so the same person can be recognized across disconnected sessions.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <p>© 2025 Severin Ihnat</p>
+  <p>New York City</p>
+</footer>
+
+<script>
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40));
+  const obs = new IntersectionObserver(
+    es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } }),
+    { threshold: 0.08, rootMargin: '0px 0px -30px 0px' }
+  );
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>
