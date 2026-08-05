@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Local Document Intelligence Pipeline — Severin Ihnat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,400&family=Outfit:wght@300;400;500;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="project.css" />
+</head>
+<body>
+
+<nav id="nav">
+  <a class="nav-logo" href="/">SI<span>.</span></a>
+  <a class="nav-back" href="/#projects">← Back to projects</a>
+</nav>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="proj-hero reveal">
+    <div class="proj-hero-text">
+      <p class="proj-meta">AI · RAG · Agentic Systems · 2025–present</p>
+      <h1 class="proj-title">Local Document<br /><em>Intelligence Pipeline</em></h1>
+      <div class="proj-tags">
+        <span class="proj-tag">Work in Progress</span>
+        <span class="proj-tag">Python</span>
+        <span class="proj-tag">sentence-transformers</span>
+        <span class="proj-tag">Chroma</span>
+        <span class="proj-tag">Ollama</span>
+        <span class="proj-tag">LangChain</span>
+      </div>
+    </div>
+    <div class="proj-hero-img">
+      <img src="../img/doc_rag/ai_agent.jpg" alt="AI agent document pipeline" />
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section class="sec">
+    <div class="wrap" style="padding:0">
+      <p class="eyebrow reveal">Overview</p>
+      <h2 class="sec-title reveal rd1">What it is <em>&amp; why</em></h2>
+      <div class="body-text reveal rd2">
+        <p><strong>This project is a work in progress.</strong> The goal is to build a general-purpose agentic system for document intelligence — one where a model can ingest a heterogeneous corpus of documents and call the right retrieval tools to answer questions grounded in the actual content.</p>
+        <p>Rather than a fixed retrieval pipeline, the system is designed around an agent that decides how to answer: querying a vector store, looking up structured data, or explicitly declining when the answer isn't in the corpus. The last behavior is intentional — for high-stakes use cases, a confident wrong answer is worse than no answer at all.</p>
+        <p>Document types supported so far include PDFs, spreadsheets, and web-scraped policy pages. The architecture is fully local with no cloud dependency.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TECHNICAL APPROACH -->
+  <section class="sec">
+    <div class="wrap" style="padding:0">
+      <p class="eyebrow reveal">Technical Approach</p>
+      <h2 class="sec-title reveal rd1">Architecture &amp; <em>decisions</em></h2>
+      <div class="body-text reveal rd2">
+        <p><strong>Ingestion & chunking.</strong> Documents are split using recursive text splitting, tuned per document type. A layout-aware PDF parser detects multi-column academic formatting from word coordinate geometry and crops columns before extraction — standard parsers produce garbled text on two-column papers.</p>
+        <p><strong>Embeddings & retrieval.</strong> Chunks are embedded locally with <code>sentence-transformers</code> and stored in a persistent Chroma vector database. A multi-collection architecture keeps distinct document corpora separate, which matters when you want to scope retrieval to a specific knowledge base.</p>
+        <p><strong>Agentic layer.</strong> Built on Ollama (local LLM inference). At query time the model selects among available tools — vector retrieval or a structured CSV query tool — or declines if nothing relevant is found. A LangChain agent layer adds cross-encoder re-ranking on top of initial retrieval, improving result quality for longer or ambiguous queries.</p>
+        <p><strong>Eval framework.</strong> Hand-authored questions across three buckets: single-document lookup, cross-document synthesis, and trap questions designed to test explicit declination. This is how the "refuses to hallucinate" behavior gets verified rather than assumed.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATUS -->
+  <section class="sec">
+    <div class="wrap" style="padding:0">
+      <p class="eyebrow reveal">Status</p>
+      <h2 class="sec-title reveal rd1">Current state &amp; <em>next steps</em></h2>
+      <div class="body-text reveal rd2">
+        <p><strong>Work in progress.</strong> The core RAG pipeline, multi-collection Chroma store, layout-aware PDF parser, and LangChain agent with re-ranking are all functional. The eval harness has a working question set across all three buckets.</p>
+        <p>The main thing being developed now is expanding the tool set available to the agent — adding more document types, richer metadata filtering, and better multi-hop reasoning across collections. The longer-term goal is a general agentic workflow layer that can be pointed at any document corpus.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LINKS -->
+  <section class="sec">
+    <div class="wrap" style="padding:0">
+      <p class="eyebrow reveal">Links</p>
+      <h2 class="sec-title reveal rd1">Code &amp; <em>resources</em></h2>
+      <div class="link-row reveal rd2">
+        <a class="btn-solid" href="https://github.com/sihnat24/doc-rag" target="_blank">GitHub →</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <p>© 2025 Severin Ihnat</p>
+  <p>New York City</p>
+</footer>
+
+<script>
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40));
+  const obs = new IntersectionObserver(
+    es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } }),
+    { threshold: 0.08, rootMargin: '0px 0px -30px 0px' }
+  );
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>
