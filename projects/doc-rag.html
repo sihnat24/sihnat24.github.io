@@ -44,8 +44,8 @@
       <p class="eyebrow reveal">Overview</p>
       <h2 class="sec-title reveal rd1">What it is <em>&amp; why</em></h2>
       <div class="body-text reveal rd2">
-        <p><strong>This project is a work in progress.</strong> The goal is to build a general-purpose agentic system for document intelligence — one where a model can ingest a heterogeneous corpus of documents and call the right retrieval tools to answer questions grounded in the actual content.</p>
-        <p>Rather than a fixed retrieval pipeline, the system is designed around an agent that decides how to answer: querying a vector store, looking up structured data, or explicitly declining when the answer isn't in the corpus. The last behavior is intentional — for high-stakes use cases, a confident wrong answer is worse than no answer at all.</p>
+        <p><strong>This project is a work in progress.</strong> The goal is to build a general-purpose agentic system for document intelligence. The model ingests a heterogeneous corpus of documents and calls the right retrieval tools to answer questions grounded in the actual content.</p>
+        <p>Rather than a fixed retrieval pipeline, the system is designed around an agent that decides how to answer: querying a vector store, looking up structured data, or explicitly declining when the answer is not in the corpus. The last behavior is intentional. For high-stakes use cases, a confident wrong answer is worse than no answer at all.</p>
         <p>Document types supported so far include PDFs, spreadsheets, and web-scraped policy pages. The architecture is fully local with no cloud dependency.</p>
       </div>
     </div>
@@ -57,9 +57,9 @@
       <p class="eyebrow reveal">Technical Approach</p>
       <h2 class="sec-title reveal rd1">Architecture &amp; <em>decisions</em></h2>
       <div class="body-text reveal rd2">
-        <p><strong>Ingestion & chunking.</strong> Documents are split using recursive text splitting, tuned per document type. A layout-aware PDF parser detects multi-column academic formatting from word coordinate geometry and crops columns before extraction — standard parsers produce garbled text on two-column papers.</p>
-        <p><strong>Embeddings & retrieval.</strong> Chunks are embedded locally with <code>sentence-transformers</code> and stored in a persistent Chroma vector database. A multi-collection architecture keeps distinct document corpora separate, which matters when you want to scope retrieval to a specific knowledge base.</p>
-        <p><strong>Agentic layer.</strong> Built on Ollama (local LLM inference). At query time the model selects among available tools — vector retrieval or a structured CSV query tool — or declines if nothing relevant is found. A LangChain agent layer adds cross-encoder re-ranking on top of initial retrieval, improving result quality for longer or ambiguous queries.</p>
+        <p><strong>Ingestion and chunking.</strong> Documents are split using recursive text splitting, tuned per document type. A layout-aware PDF parser detects multi-column academic formatting from word coordinate geometry and crops columns before extraction. Standard parsers produce garbled text on two-column papers, so this step was necessary.</p>
+        <p><strong>Embeddings and retrieval.</strong> Chunks are embedded locally with <code>sentence-transformers</code> and stored in a persistent Chroma vector database. A multi-collection architecture keeps distinct document corpora separate, which matters when you want to scope retrieval to a specific knowledge base.</p>
+        <p><strong>Agentic layer.</strong> Built on Ollama for local LLM inference. At query time the model selects among available tools, including vector retrieval and a structured CSV query tool, or declines if nothing relevant is found. A LangChain agent layer adds cross-encoder re-ranking on top of initial retrieval, improving result quality for longer or ambiguous queries.</p>
         <p><strong>Eval framework.</strong> Hand-authored questions across three buckets: single-document lookup, cross-document synthesis, and trap questions designed to test explicit declination. This is how the "refuses to hallucinate" behavior gets verified rather than assumed.</p>
       </div>
     </div>
@@ -72,7 +72,7 @@
       <h2 class="sec-title reveal rd1">Current state &amp; <em>next steps</em></h2>
       <div class="body-text reveal rd2">
         <p><strong>Work in progress.</strong> The core RAG pipeline, multi-collection Chroma store, layout-aware PDF parser, and LangChain agent with re-ranking are all functional. The eval harness has a working question set across all three buckets.</p>
-        <p>The main thing being developed now is expanding the tool set available to the agent — adding more document types, richer metadata filtering, and better multi-hop reasoning across collections. The longer-term goal is a general agentic workflow layer that can be pointed at any document corpus.</p>
+        <p>The main focus right now is expanding the tool set available to the agent, including more document types, richer metadata filtering, and better multi-hop reasoning across collections. The longer-term goal is a general agentic workflow layer that can be pointed at any document corpus.</p>
       </div>
     </div>
   </section>
